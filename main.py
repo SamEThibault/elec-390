@@ -17,7 +17,7 @@ with h5py.File("./data.h5", "r") as hdf:
     john_group = hdf["John"]
 
 
-with h5py.File("./data.h5", "w") as hdf:
-    
+with h5py.File("./data.h5", "a") as hdf:
+
     # John's Datasets Generation 
-    hdf.create_dataset("back_right_J", data=)  # where matrix is a np.random.random() object
+    hdf.create_dataset("back_right_J", data=np.genfromtxt('./John_Raw/Back Right Pocket Jump.csv', delimiter=','))

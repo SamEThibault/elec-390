@@ -53,3 +53,5 @@ with h5py.File("./data.h5", "a") as hdf:
     vivian_group.create_dataset("left_coat_J", data=np.genfromtxt('./Vivian_Raw/Left Coat Jumping.csv', delimiter=','))
     vivian_group.create_dataset("front_coat_W", data=np.genfromtxt('./Vivian_Raw/Coat Chest Walking.csv', delimiter=','))
     vivian_group.create_dataset("front_coat_J", data=np.genfromtxt('./Vivian_Raw/Coat Chest Jumping.csv', delimiter=','))
+
+

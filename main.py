@@ -163,5 +163,3 @@ with h5py.File("./data.h5", "a") as hdf:
     print(jump)
     print("********** WALKING DF *************")
     print(walk)
-
-    

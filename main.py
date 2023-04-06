@@ -243,7 +243,7 @@ walk_column_features = {}
 # # Load the signals from the HDF5 file
 # with h5py.File('your_file.hdf5', 'r') as f:
 #     signals = f['signals'][:]
-    
+
 # # Divide each signal into 5-second windows
 # window_size = 5 * 1000  # 5 seconds in milliseconds
 # windows = []
@@ -270,23 +270,31 @@ walk_column_features = {}
 #     segmented_data.attrs['train_test_split'] = 0.9
 
 
-
-
-
 # (500 data points per 5 seconds)
 # jump_column_features : collection0, collection 1 : column0 : features, column1 : features...
 
 
 # Find features for each collection of 500 data points
-jump_split = np.array_split(jump, len(jump) / 500)
+# jump_split = np.array_split(jump, len(jump) / 500)
 # print("JUMP SPLIT")
 # print(jump_split)
+
+# Shuffle the data
+jump_shuffled = jump.sample(frac=1).reset_index(drop=True)
+walk_shuffled = walk.sample(frac=1).reset_index(drop=True)
+
+# Shuffle and split data into 90% training, 10% testing
+jump_train = jump_shuffled[: int(0.9 * len(jump_shuffled))]
+jump_test = jump_shuffled[int(0.1 * len(jump_shuffled)) :]
+
+walk_train = walk_shuffled[: int(0.9 * len(walk_shuffled))]
+walk_test = walk_shuffled[int(0.1 * len(walk_shuffled)) :]
 
 # Extract features for each window of data in the jump dataframe
 jump_features = []
 jump_features_dict = {}
-for i in range(0, len(jump), 500):
-    window = jump[i:i+500]
+for i in range(0, len(jump_shuffled), 500):
+    window = jump_shuffled[i : i + 500]
     window_features = {}
     for column in window.columns:
         column_data = window[column]
@@ -300,8 +308,8 @@ for i in range(len(jump_features)):
 # Extract features for each window of data in the walk dataframe
 walk_features = []
 walk_features_dict = {}
-for i in range(0, len(walk), 500):
-    window = walk[i:i+500]
+for i in range(0, len(walk_shuffled), 500):
+    window = walk_shuffled[i : i + 500]
     window_features = {}
     for column in window.columns:
         column_data = window[column]
@@ -313,13 +321,12 @@ for i in range(len(walk_features)):
     walk_features_dict[i] = walk_features[i]
 
 
-# Normalize data so that it becomes suitable for logistic regression using StandardScaler
+# Normalize shuffled training data so that it becomes suitable for logistic regression using StandardScaler
 scaler = StandardScaler()
-jump_scaled = scaler.fit_transform(jump)
-walk_scaled = scaler.fit_transform(walk)
+jump_train_scaled = scaler.fit_transform(jump_train)
+walk_train_scaled = scaler.fit_transform(walk_train)
 
-# Then make 5-second segments (should be splitting the array into sets of 500 data points), (DONE)
-# Shuffle and split data into 90% training, 10% testing 
+
 # Train logistic regression model to classify the data into walking and jumping classes
 
 

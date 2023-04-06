@@ -235,38 +235,93 @@ def calculate_features(data):
 # Extract features for each column in the both data frames
 jump_column_features = {}
 walk_column_features = {}
-for column in jump.columns:
-    column_data = jump[column]
-    jump_column_features[column] = calculate_features(column_data)
 
-for column in walk.columns:
-    column_data = walk[column]
-    walk_column_features[column] = calculate_features(column_data)
+# import h5py
+# import numpy as np
+# from sklearn.utils import shuffle
 
-print("JUMPING FEATURES")
-# Print the features for each column of Jump
-for column, features in jump_column_features.items():
-    print(f'Features for column "{column}":')
-    for feature_name, feature_value in features.items():
-        print(f"{feature_name}: {feature_value}")
-    print("\n")
+# # Load the signals from the HDF5 file
+# with h5py.File('your_file.hdf5', 'r') as f:
+#     signals = f['signals'][:]
+    
+# # Divide each signal into 5-second windows
+# window_size = 5 * 1000  # 5 seconds in milliseconds
+# windows = []
+# for signal in signals:
+#     for i in range(0, len(signal) - window_size, window_size):
+#         window = signal[i:i+window_size]
+#         windows.append(window)
+# windows = np.array(windows)
 
-print("WALKING FEATURES")
-# Print the walk features for each column
-for column, features in walk_column_features.items():
-    print(f'Features for column "{column}":')
-    for feature_name, feature_value in features.items():
-        print(f"{feature_name}: {feature_value}")
-    print("\n")
+# # Shuffle the segmented data
+# windows_shuffled = shuffle(windows, random_state=42)
+
+# # Split the shuffled data into training and testing sets
+# split_index = int(len(windows_shuffled) * 0.9)
+# train_data = windows_shuffled[:split_index]
+# test_data = windows_shuffled[split_index:]
+
+# # Store the new dataset in the HDF5 file
+# with h5py.File('your_file.hdf5', 'a') as f:
+#     if 'segmented_data' in f:
+#         del f['segmented_data']
+#     segmented_data = f.create_dataset('segmented_data', data=windows_shuffled)
+#     segmented_data.attrs['window_size'] = window_size
+#     segmented_data.attrs['train_test_split'] = 0.9
+
+
+
+
+
+# (500 data points per 5 seconds)
+# jump_column_features : collection0, collection 1 : column0 : features, column1 : features...
+
+
+# Find features for each collection of 500 data points
+jump_split = np.array_split(jump, len(jump) / 500)
+# print("JUMP SPLIT")
+# print(jump_split)
+
+# Extract features for each window of data in the jump dataframe
+jump_features = []
+jump_features_dict = {}
+for i in range(0, len(jump), 500):
+    window = jump[i:i+500]
+    window_features = {}
+    for column in window.columns:
+        column_data = window[column]
+        window_features[column] = calculate_features(column_data)
+    jump_features.append(window_features)
+
+# This allows us to associate the features dictionary with each collection index {index : features dict}
+for i in range(len(jump_features)):
+    jump_features_dict[i] = jump_features[i]
+
+# Extract features for each window of data in the walk dataframe
+walk_features = []
+walk_features_dict = {}
+for i in range(0, len(walk), 500):
+    window = walk[i:i+500]
+    window_features = {}
+    for column in window.columns:
+        column_data = window[column]
+        window_features[column] = calculate_features(column_data)
+    walk_features.append(window_features)
+
+# This allows us to associate the features dictionary with each collection index {index : features dict}
+for i in range(len(walk_features)):
+    walk_features_dict[i] = walk_features[i]
+
 
 # Normalize data so that it becomes suitable for logistic regression using StandardScaler
 scaler = StandardScaler()
 jump_scaled = scaler.fit_transform(jump)
 walk_scaled = scaler.fit_transform(walk)
 
-# Then make 5-second segments (should be splitting the array into sets of 500 data points),
-# Shuffle and split data into 90% training, 10% testing
+# Then make 5-second segments (should be splitting the array into sets of 500 data points), (DONE)
+# Shuffle and split data into 90% training, 10% testing 
 # Train logistic regression model to classify the data into walking and jumping classes
+
 
 # Then apply that model on the test set, and record accuracy
 

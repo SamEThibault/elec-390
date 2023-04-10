@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import h5py
 import matplotlib.pyplot as plt
-from scipy.stats import skew
+from scipy.stats import skew, kurtosis, mode
 from sklearn.preprocessing import StandardScaler
 
 
@@ -229,6 +229,9 @@ def calculate_features(data):
     features["median"] = np.median(data)
     features["variance"] = np.var(data)
     features["skewness"] = skew(data)
+    features["kurtosis"] = kurtosis(data)
+    features["deviation"] = np.std(data)
+    features["mode"] = mode(data)
     return features
 
 

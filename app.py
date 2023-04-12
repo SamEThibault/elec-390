@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QTextEdit,
 )
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap, QFont
 import matplotlib.pyplot as plt
 
 from main import classify, train
@@ -22,6 +22,8 @@ class MainWindow(QMainWindow):
 
         # start by training the model so we can use it to classify
         self.model = train()
+
+        self.start = True
 
         # set window title
         self.setWindowTitle("Accelerometer Classifier")
@@ -62,6 +64,27 @@ class MainWindow(QMainWindow):
         self.plot_label = QLabel("", self)
         self.plot_label.move(10, 130)
         self.plot_label.resize(1000, 600)
+
+        # ----------- LIVE -------------
+        # create button widget for classifying the data LIVE
+        self.classify_live_btn = QPushButton("Classify in real time", self)
+        self.classify_live_btn.move(480, 70)
+        self.classify_live_btn.resize(130, 20)
+        self.classify_live_btn.clicked.connect(self.classify_data_live)
+
+        # create end experiment btn
+        self.end_btn = QPushButton("End Experiment", self)
+        self.end_btn.move(480, 125)
+        self.end_btn.resize(125, 20)
+        self.end_btn.clicked.connect(self.end_clicked)
+
+        # create label that will update with Jumping or Walking
+        self.label = QLabel("Live Experiment Not Started", self)
+        font = QFont()
+        font.setPointSize(16)
+        self.label.setFont(font)
+        self.label.resize(300, 30)
+        self.label.move(480, 20)
 
     # get input file from user
     def select_input_file(self):
@@ -127,6 +150,36 @@ class MainWindow(QMainWindow):
 
         # set the plot image to the label widget
         self.plot_label.setPixmap(QPixmap.fromImage(plot_qimage))
+
+
+    # fetch request and classify data
+    def classify_data_live(self):
+
+        # As long as we don't press the stop button
+        while self.start:
+            # read the data from the excel file output from Phyphox
+            data = pd.read_excel("http://192.168.0.16/export?format=0")
+
+            # since the xls file will keep getting larger as the expirement continues, only get recent data (last 5000 rows)
+            recent_data = data.tail(5000)
+
+            # call the classify function with the recent data
+            res = classify(recent_data, self.model)
+            print(res)
+
+            # if more than half of the labels are jump, display "Jumping"
+            if res["label"].value_counts()["jumping"] > (len(res.index) / 2):
+                self.label.setText("Jumping")
+            else:
+                self.label.setText("Walking")
+
+            # to process GUI event changes even in an infinite loop
+            QApplication.processEvents()
+
+
+    def end_clicked(self):
+        self.start = False
+        # sys.exit()
 
 
 # so we can run it as a script

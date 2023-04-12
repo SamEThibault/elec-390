@@ -4,6 +4,8 @@ import h5py
 import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis, mode
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
 
 ######################## DATA STORING ########################
@@ -177,12 +179,12 @@ with h5py.File("./data.h5", "a") as hdf:
 # print(missing_values)
 
 # Labelling all columns
-jump.columns = ["time", "x-g", "y-g", "z-g", "abs-g", "label"]
-walk.columns = ["time", "x-g", "y-g", "z-g", "abs-g", "label"]
+jump.columns = ["time", "x-g", "y-g", "z-g", "abs-g", "label"] #john edit - removed label
+walk.columns = ["time", "x-g", "y-g", "z-g", "abs-g", "label"] #talk to sam ab this
 
 # Drop unnecessary columns
-jump.drop(["time", "abs-g"], axis=1, inplace=True)
-walk.drop(["time", "abs-g"], axis=1, inplace=True)
+jump.drop(["time", "abs-g", "label"], axis=1, inplace=True)
+walk.drop(["time", "abs-g", "label"], axis=1, inplace=True)
 
 print("********** JUMPING DF (ORIGINAL) *************")
 print(jump)
@@ -330,7 +332,34 @@ jump_train_scaled = scaler.fit_transform(jump_train)
 walk_train_scaled = scaler.fit_transform(walk_train)
 
 
-# Train logistic regression model to classify the data into walking and jumping classes
+# Train logistic regression model to classify the data into walking and jumping classes - John & Vivian
+
+
+# Concatenate the jump and walk training data and labels
+X_train = np.concatenate((jump_train_scaled, walk_train_scaled))
+y_train = np.concatenate((np.ones(len(jump_train_scaled)), np.zeros(len(walk_train_scaled))))
+
+# Initialize logistic regression model
+logreg_model = LogisticRegression()
+
+# Fit the model to the training data
+logreg_model.fit(X_train, y_train)
+
+# Normalize the test data
+jump_test_scaled = scaler.transform(jump_test)
+walk_test_scaled = scaler.transform(walk_test)
+
+# Concatenate the jump and walk test data and labels
+X_test = np.concatenate((jump_test_scaled, walk_test_scaled))
+y_test = np.concatenate((np.ones(len(jump_test_scaled)), np.zeros(len(walk_test_scaled))))
+
+# Make predictions on the test data using the trained model
+y_pred = logreg_model.predict(X_test)
+
+# Calculate accuracy of the predictions
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy:", accuracy)
+
 
 
 # Then apply that model on the test set, and record accuracy

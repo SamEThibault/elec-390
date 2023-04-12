@@ -341,7 +341,6 @@ def train():
 
     # Then apply that model on the test set, and record accuracy
 
-# train()
 
 # not sure if you need to retrain a whole model or if you can use the trained model
 def classify(data_original):

@@ -9,6 +9,7 @@ from sklearn.metrics import accuracy_score
 
 
 ######################## DATA STORING ########################
+# helper function for train() to set up hdf5 file and dataframes
 def setup_data():
     # Create HDF5 File
     with h5py.File("./data.h5", "w") as hdf:
@@ -360,5 +361,5 @@ def classify(data_original, model):
         print(prediction)
 
     data["label"] = ["walking" if x == 0.0 else "jumping" for x in range(len(res))]
-    
+
     return data

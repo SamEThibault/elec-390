@@ -169,3 +169,8 @@ def setup_data():
                 walk = pd.concat([walk, pd.DataFrame(data)])
 
         return walk, jump
+    
+
+def store_dataset(training, testing):
+    training.to_hdf('./data.h5', '/dataset/training')
+    testing.to_hdf('./data.h5', '/dataset/testing')

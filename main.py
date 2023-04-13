@@ -5,7 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
-from data_setup import setup_data
+from data_setup import setup_data, store_dataset
 
 ######################## FEATURE EXTRACTION ########################
 def calculate_features(data):
@@ -105,6 +105,8 @@ def train():
     X_train, X_test, y_train, y_test = train_test_split(
         features, labels[: len(features)], test_size=0.1, shuffle=True, random_state=0
     )
+
+    store_dataset(X_train, X_test)
 
     # initiate logistic regression model and pipeline it with scaled data
     l_reg = LogisticRegression(max_iter=10000)

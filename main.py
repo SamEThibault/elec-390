@@ -12,7 +12,7 @@ def calculate_features(data):
 
     # will return dataframe with each acc dimension's features
     features = pd.DataFrame()
-   
+
     column_names = [
         ["max_X", "max_Y", "max_Z"],
         ["min_X", "min_Y", "min_Z"],
@@ -106,6 +106,7 @@ def train():
         features, labels[: len(features)], test_size=0.1, shuffle=True, random_state=0
     )
 
+    # store train and test data into hdf5
     store_dataset(X_train, X_test)
 
     # initiate logistic regression model and pipeline it with scaled data

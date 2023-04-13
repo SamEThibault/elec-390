@@ -132,15 +132,19 @@ class MainWindow(QMainWindow):
         ax.scatter(
             data["Time (s)"],
             data["Absolute acceleration (m/s^2)"],
-            c=res["label"].apply(lambda x: "r" if x == "walking" else "b"),
+            c=res["label"].apply(lambda x: "b" if x == "walking" else "r"),
             s=1,
             label="Walking",
         )
 
+        ax.legend()
+        legend = ax.get_legend()
+        legend.legendHandles[0].set_color('blue')
+        legend.legendHandles[1].set_color('red')
+
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Absolute Acceleration (m/s^2)")
         ax.set_title("Accelerometer Data Classification")
-        ax.legend()
         fig.canvas.draw()
 
         # convert the plot to a QImage
@@ -168,8 +172,8 @@ class MainWindow(QMainWindow):
             res = classify(recent_data, self.model)
             print(res)
 
-            # if more than half of the labels are jump, display "Jumping"
-            if res["label"].value_counts()["jumping"] > (len(res.index) / 2):
+            # if last label is jumping, display "Jumping", else assume walking
+            if res["label"].iloc[-1] == "jumping":
                 self.label.setText("Jumping")
             else:
                 self.label.setText("Walking")

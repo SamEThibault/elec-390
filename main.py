@@ -470,7 +470,6 @@ def classify(data_original, model):
 
     # data.dropna(inplace=True)
     features = calculate_features(data)
-
     res = model.predict(features)
 
     # for prediction in res:
@@ -486,7 +485,7 @@ def classify(data_original, model):
     print(data)
 
     # 0 means walking, 1 means jumping: replace these values with the proper labels
-    data["label"] = ["walking" if x == 0 else "jumping" for x in range(len(features))]
+    data["label"] = ["walking" if x == 0 else "jumping" for x in res]
 
     # assign labels to first len(res) rows of data
     # data.iloc[:len(res), -1] = ["walking" if x == 0.0 else "jumping" for x in res]

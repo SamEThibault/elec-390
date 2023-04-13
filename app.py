@@ -125,7 +125,7 @@ class MainWindow(QMainWindow):
             data["Time (s)"],
             data["Absolute acceleration (m/s^2)"],
             c=res["label"].apply(lambda x: "r" if x == "jumping" else "b"),
-            s=1,
+            s=2,
             label="Jumping",
         )
 
@@ -133,7 +133,7 @@ class MainWindow(QMainWindow):
             data["Time (s)"],
             data["Absolute acceleration (m/s^2)"],
             c=res["label"].apply(lambda x: "b" if x == "walking" else "r"),
-            s=1,
+            s=2,
             label="Walking",
         )
 
@@ -184,7 +184,6 @@ class MainWindow(QMainWindow):
 
     def end_clicked(self):
         self.start = False
-        # sys.exit()
 
 
 # so we can run it as a script

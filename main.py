@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 import h5py
-import matplotlib.pyplot as plt
-from scipy.stats import skew, kurtosis, mode
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
@@ -180,107 +178,111 @@ def setup_data():
 
 
 ######################## FEATURE EXTRACTION ########################
-# max, min, range, mean, median, variance, skewness, mode (most frequent number)
-
-# Different Types of Features:
-# Statistical: max, min, mean, standard deviation, median, range, skewness, kurtosis
-# Frequency features: FFT, followed by amplitude or phase in certain regions
-# Information: entropy, coherence
-
-
-def SplitFeature(df):
-    return df.iloc[:, 0], df.iloc[:, 1], df.iloc[:, 2]
-
-
 def calculate_features(data):
-    # features = {}
-    # features["max"] = np.max(data)
-    # features["min"] = np.min(data)
-    # features["range"] = features["max"] - features["min"]
-    # features["mean"] = np.mean(data)
-    # features["median"] = np.median(data)
-    # features["variance"] = np.var(data)
-    # features["skewness"] = skew(data)
-    # features["kurtosis"] = kurtosis(data)
-    # features["deviation"] = np.std(data)
-    # features["mode"] = mode(data)
-    # return features
 
+    # will return dataframe with each acc dimension's features
     features = pd.DataFrame(
         columns=[
-            "meanX",
-            "meanY",
-            "meanZ",
-            "stdX",
-            "stdY",
-            "stdZ",
-            "maxX",
-            "maxY",
-            "maxZ",
-            "minX",
-            "minY",
-            "minZ",
-            "kurtX",
-            "kurtY",
-            "kurtZ",
-            "skewX",
-            "skewY",
-            "skewZ",
-            "rmsX",
-            "rmsY",
-            "rmsZ",
-            "medianX",
-            "medianY",
-            "medianZ",
-            "diffX",
-            "diffY",
-            "diffZ",
-            "diffabsX",
-            "diffabsY",
-            "diffabsZ",
-            "varianceX",
-            "varianceY",
-            "varianceZ",
+            "max_X",
+            "max_Y",
+            "max_Z",
+            "min_X",
+            "min_Y",
+            "min_Z",
+            "range_X",
+            "range_Y",
+            "range_Z",
+            "mean_X",
+            "mean_Y",
+            "mean_Z",
+            "median_X",
+            "median_Y",
+            "median_Z",
+            "var_X",
+            "var_Y",
+            "var_Z",
+            "skew_X",
+            "skew_Y",
+            "skew_Z",
+            "kurtosis_X",
+            "kurtosis_Y",
+            "kurtosis_Z",
+            "deviation_X",
+            "deviation_Y",
+            "deviation_Z",
+            "quantile_X",
+            "quantile_Y",
+            "quantile_Z",
         ]
     )
 
-    window_size = 500
+    # 500 samples: 5 second intervals @ 100 Hz sampling rate, which is what Phyphox uses
+    # split into 500 sample groups and find the features
+    maximum = data.rolling(window=500).max()
+    minimum = data.rolling(window=500).min()
+    rng = maximum - minimum
+    mean = data.rolling(window=500).mean()
+    median = data.rolling(window=500).median()
+    variance = data.rolling(window=500).var()
+    skewness = data.rolling(window=500).skew()
+    kurtosis = data.rolling(window=500).kurt()
+    deviation = data.rolling(window=500).std()
+    quantile = data.rolling(window=500).quantile(0.5)
 
-    def difference(x):
-        return x.iloc[-1] - x.iloc[0]
-
-    def difference_abs(x):
-        return abs(x.iloc[-1] - x.iloc[0])
-
-    mean = data.rolling(window=window_size).mean()
-    std = data.rolling(window=window_size).std()
-    max = data.rolling(window=window_size).max()
-    min = data.rolling(window=window_size).min()
-    kurt = data.rolling(window=window_size).kurt()
-    skew = data.rolling(window=window_size).skew()
-    rms = data.pow(2).rolling(window=window_size).mean().apply(np.sqrt, raw=True)
-    median = data.rolling(window=window_size).median()
-    diff = data.rolling(window=window_size).apply(difference)
-    diff_abs = data.rolling(window=window_size).apply(difference_abs)
-    variance = data.rolling(window=window_size).std() ** 2
-
-    features["meanX"], features["meanY"], features["meanZ"] = SplitFeature(mean)
-    features["stdX"], features["stdY"], features["stdZ"] = SplitFeature(std)
-    features["maxX"], features["maxY"], features["maxZ"] = SplitFeature(max)
-    features["minX"], features["minY"], features["minZ"] = SplitFeature(min)
-    features["kurtX"], features["kurtY"], features["kurtZ"] = SplitFeature(kurt)
-    features["skewX"], features["skewY"], features["skewZ"] = SplitFeature(skew)
-    features["rmsX"], features["rmsY"], features["rmsZ"] = SplitFeature(rms)
-    features["medianX"], features["medianY"], features["medianZ"] = SplitFeature(median)
-    features["diffX"], features["diffY"], features["diffZ"] = SplitFeature(diff)
-    features["diffabsX"], features["diffabsY"], features["diffabsZ"] = SplitFeature(
-        diff_abs
+    # then, split into respective dimensions
+    features["max_X"], features["max_Y"], features["max_Z"] = (
+        maximum.iloc[:, 0],
+        maximum.iloc[:, 1],
+        maximum.iloc[:, 2],
     )
-    features["varianceX"], features["varianceY"], features["varianceZ"] = SplitFeature(
-        variance
+    features["min_X"], features["min_Y"], features["min_Z"] = (
+        minimum.iloc[:, 0],
+        minimum.iloc[:, 1],
+        minimum.iloc[:, 2],
+    )
+    features["range_X"], features["range_Y"], features["range_Z"] = (
+        rng.iloc[:, 0],
+        rng.iloc[:, 1],
+        rng.iloc[:, 2],
+    )
+    features["mean_X"], features["mean_Y"], features["mean_Z"] = (
+        mean.iloc[:, 0],
+        mean.iloc[:, 1],
+        mean.iloc[:, 2],
+    )
+    features["median_X"], features["median_Y"], features["median_Z"] = (
+        median.iloc[:, 0],
+        median.iloc[:, 1],
+        median.iloc[:, 2],
+    )
+    features["var_X"], features["var_Y"], features["var_Z"] = (
+        variance.iloc[:, 0],
+        variance.iloc[:, 1],
+        variance.iloc[:, 2],
+    )
+    features["skew_X"], features["skew_Y"], features["skew_Z"] = (
+        skewness.iloc[:, 0],
+        skewness.iloc[:, 1],
+        skewness.iloc[:, 2],
+    )
+    features["kurtosis_X"], features["kurtosis_Y"], features["kurtosis_Z"] = (
+        kurtosis.iloc[:, 0],
+        kurtosis.iloc[:, 1],
+        kurtosis.iloc[:, 2],
+    )
+    features["deviation_X"], features["deviation_Y"], features["deviation_Z"] = (
+        deviation.iloc[:, 0],
+        deviation.iloc[:, 1],
+        deviation.iloc[:, 2],
+    )
+    features["quantile_X"], features["quantile_Y"], features["quantile_Z"] = (
+        quantile.iloc[:, 0],
+        quantile.iloc[:, 1],
+        quantile.iloc[:, 2],
     )
 
-    features = features.dropna()
+    # drop none values (size will dictate size of result)
+    features.dropna(inplace=True)
     return features
 
 
@@ -290,14 +292,7 @@ def train():
     walk, jump = setup_data()
 
     ######################## PRE-PROCESSING ########################
-    # Labelling all columns
-    # jump.columns = ["time", "x-g", "y-g", "z-g", "abs-g", "label"]
-    # walk.columns = ["time", "x-g", "y-g", "z-g", "abs-g", "label"]
-
-    # # Drop unnecessary columns
-    # jump.drop(["time", "abs-g"], axis=1, inplace=True)
-    # walk.drop(["time", "abs-g"], axis=1, inplace=True)
-
+    # name labels
     jump.columns = [
         "time",
         "x-g",
@@ -305,7 +300,7 @@ def train():
         "z-g",
         "abs-g",
         "label",
-    ]  # john edit - removed label
+    ]
     walk.columns = [
         "time",
         "x-g",
@@ -313,99 +308,45 @@ def train():
         "z-g",
         "abs-g",
         "label",
-    ]  # talk to sam ab this
+    ]
 
     # Drop unnecessary columns
     jump.drop(["time", "abs-g", "label"], axis=1, inplace=True)
     walk.drop(["time", "abs-g", "label"], axis=1, inplace=True)
 
-    # print("********** JUMPING DF (ORIGINAL) *************")
-    # print(jump)
-    # print("********** WALKING DF (ORIGNAL) *************")
-    # print(walk)
+    # drop noneType values
+    walk.dropna(inplace=True)
+    jump.dropna(inplace=True)
 
-    # Replace missing values with the mean of the column
-    walk.fillna(walk.mean(), inplace=True)
-    jump.fillna(jump.mean(), inplace=True)
-
-    # Remove noise using a moving average filter                # Might not be a good window size, double check
-    jump = jump.rolling(25, min_periods=1).mean()
-    walk = walk.rolling(25, min_periods=1).mean()
-
-    # print("********** JUMPING DF (FILTERED) *************")
-    # print(jump)
-    # print("********** WALKING DF (FILTERED) *************")
-    # print(walk)
-
-    # Shuffle the data
-    jump_shuffled = jump.sample(frac=1).reset_index(drop=True)
-    walk_shuffled = walk.sample(frac=1).reset_index(drop=True)
-
-    # Shuffle and split data into 90% training, 10% testing
-    jump_train = jump_shuffled[: int(0.9 * len(jump_shuffled))]
-    jump_test = jump_shuffled[int(0.1 * len(jump_shuffled)) :]
-
-    walk_train = walk_shuffled[: int(0.9 * len(walk_shuffled))]
-    walk_test = walk_shuffled[int(0.1 * len(walk_shuffled)) :]
-
-    # Extract features for each window of data in the jump dataframe
-    # jump_features = []
-    # jump_features_dict = {}
-    # for i in range(0, len(jump_shuffled), 500):
-    #     window = jump_shuffled[i : i + 500]
-    #     window_features = {}
-    #     for column in window.columns:
-    #         column_data = window[column]
-    #         window_features[column] = calculate_features(column_data)
-    #     jump_features.append(window_features)
-
-    # # This allows us to associate the features dictionary with each collection index {index : features dict}
-    # for i in range(len(jump_features)):
-    #     jump_features_dict[i] = jump_features[i]
-
-    # # Extract features for each window of data in the walk dataframe
-    # walk_features = []
-    # walk_features_dict = {}
-    # for i in range(0, len(walk_shuffled), 500):
-    #     window = walk_shuffled[i : i + 500]
-    #     window_features = {}
-    #     for column in window.columns:
-    #         column_data = window[column]
-    #         window_features[column] = calculate_features(column_data)
-    #     walk_features.append(window_features)
-
-    # # This allows us to associate the features dictionary with each collection index {index : features dict}
-    # for i in range(len(walk_features)):
-    #     walk_features_dict[i] = walk_features[i]
-
-    # Normalize shuffled training data so that it becomes suitable for logistic regression using StandardScaler
-    # scaler = StandardScaler()
-    # jump_train_scaled = scaler.fit_transform(jump_train)
-    # walk_train_scaled = scaler.fit_transform(walk_train)
+    # Remove noise using a moving average filter, window size: 40
+    jump = jump.rolling(40, min_periods=1).mean()
+    walk = walk.rolling(40, min_periods=1).mean()
 
     ############## TRAINING #############
+
     # Train logistic regression model to classify the data into walking and jumping classes - John & Vivian
 
+    # merge 2 datasets together, then put zeros as labels for walking, and ones for jump labels
     data_temp = [walk, jump]
     data = pd.concat(data_temp)
-
-    features = calculate_features(data)
     labels = np.concatenate((np.zeros(len(walk)), np.ones(len(jump))))
 
-    print(labels)
+    # get the features
+    features = calculate_features(data)
 
+    # split and shuffle the features into 90% training, 10% testing (use length of features that have dropped noneType vals)
     X_train, X_test, y_train, y_test = train_test_split(
-        features, labels[-len(features) :], test_size=0.1, shuffle=True, random_state=0
+        features, labels[: len(features)], test_size=0.1, shuffle=True, random_state=0
     )
+
+    # initiate logistic regression model and pipeline it with scaled data
     l_reg = LogisticRegression(max_iter=10000)
     clf = make_pipeline(StandardScaler(), l_reg)
-
     clf.fit(X_train, y_train)
 
+    # predictions and probabilities
     y_pred = clf.predict(X_test)
     y_clf_prob = clf.predict_proba(X_test)
-    X_pred = clf.predict(X_train)
-    X_pred_prob = clf.predict_proba(X_train)
 
     print("y_pred is: ", y_pred)
     print("y_clf_prob is: ", y_clf_prob)
@@ -413,49 +354,13 @@ def train():
     acc = accuracy_score(y_test, y_pred)
     print("accuracy is: ", acc)
 
-    print("X_pred is: ", X_pred)
-    print("X_pred_prob is: ", X_pred_prob)
-
-    acc_X = accuracy_score(y_train, X_pred)
-    print("accuracy is: ", acc_X)
-
+    # Return regression object for application classifier
     return clf
-
-    # Concatenate the jump and walk training data and labels
-    # X_train = np.concatenate((jump_train_scaled, walk_train_scaled))
-    # y_train = np.concatenate(
-    #     (np.ones(len(jump_train_scaled)), np.zeros(len(walk_train_scaled)))
-    # )
-
-    # # Initialize logistic regression model
-    # logreg_model = LogisticRegression()
-
-    # # Fit the model to the training data
-    # logreg_model.fit(X_train, y_train)
-
-    # # Normalize the test data
-    # jump_test_scaled = scaler.transform(jump_test)
-    # walk_test_scaled = scaler.transform(walk_test)
-
-    # # Concatenate the jump and walk test data and labels
-    # X_test = np.concatenate((jump_test_scaled, walk_test_scaled))
-    # y_test = np.concatenate(
-    #     (np.ones(len(jump_test_scaled)), np.zeros(len(walk_test_scaled)))
-    # )
-
-    # # Make predictions on the test data using the trained model
-    # y_pred = logreg_model.predict(X_test)
-
-    # # Calculate accuracy of the predictions
-    # accuracy = accuracy_score(y_test, y_pred)
-    # print("Accuracy:", accuracy)
-    return logreg_model
 
 
 # get data from csv input, and use trained model from when the app started up
 def classify(data_original, model):
 
-    # add empty label column
     data = data_original.copy()
 
     # label columns
@@ -465,28 +370,17 @@ def classify(data_original, model):
     # Drop unnecessary columns
     data.drop(["time", "abs-g"], axis=1, inplace=True)
 
-    # data.fillna(data.mean(), inplace=True)
+    # normalize data and get features: then predict using passed in model
     data = data.rolling(25, min_periods=1).mean()
-
-    # data.dropna(inplace=True)
     features = calculate_features(data)
     res = model.predict(features)
 
-    # for prediction in res:
-    #     print(prediction)
-
+    # ignore number of NA vals that were dropped in feature extraction
     data = data[: len(features)]
 
-    print(len(res))
-    print(len(features))
-    print(len(data))
-
     data["label"] = ""
-    print(data)
 
     # 0 means walking, 1 means jumping: replace these values with the proper labels
     data["label"] = ["walking" if x == 0 else "jumping" for x in res]
 
-    # assign labels to first len(res) rows of data
-    # data.iloc[:len(res), -1] = ["walking" if x == 0.0 else "jumping" for x in res]
     return data

@@ -173,6 +173,7 @@ class MainWindow(QMainWindow):
         while self.start:
             # read the data from the excel file output from Phyphox
             try:
+                # change depending on hotspot connection: http://172.20.10.1/export?format=0
                 data = pd.read_excel("http://192.168.0.16/export?format=0")
             except Exception as e:
                 print(e)

@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
 
         # from main.py
         res = classify(data, self.model)
-        data = data[:len(res)]
+        data = data[: len(res)]
 
         # save the output file as CSV into the app_output folder
         new_file_name = input_file_path.replace(".csv", "_output.csv").split("/")[-1]
@@ -139,8 +139,8 @@ class MainWindow(QMainWindow):
 
         ax.legend()
         legend = ax.get_legend()
-        legend.legendHandles[0].set_color('blue')
-        legend.legendHandles[1].set_color('red')
+        legend.legendHandles[0].set_color("blue")
+        legend.legendHandles[1].set_color("red")
 
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Absolute Acceleration (m/s^2)")
@@ -156,31 +156,32 @@ class MainWindow(QMainWindow):
         # set the plot image to the label widget
         self.plot_label.setPixmap(QPixmap.fromImage(plot_qimage))
 
-
     # fetch request and classify data
     def classify_data_live(self):
+        self.start = True
 
         # As long as we don't press the stop button
         while self.start:
             # read the data from the excel file output from Phyphox
-            data = pd.read_excel("http://192.168.0.16/export?format=0")
+            try:
+                data = pd.read_excel("http://192.168.0.16/export?format=0")
+            except:
+                break
 
             # since the xls file will keep getting larger as the expirement continues, only get recent data (last 5000 rows)
-            recent_data = data.tail(5000)
+            recent_data = data.tail(1000)
 
             # call the classify function with the recent data
             res = classify(recent_data, self.model)
-            print(res)
 
-            # if last label is jumping, display "Jumping", else assume walking
-            if res["label"].iloc[-1] == "jumping":
+            # if at least 50% of the labels say jumping, then display jumping
+            if res["label"].value_counts()[0] > 400:
                 self.label.setText("Jumping")
             else:
                 self.label.setText("Walking")
 
             # to process GUI event changes even in an infinite loop
             QApplication.processEvents()
-
 
     def end_clicked(self):
         self.start = False

@@ -174,7 +174,7 @@ class MainWindow(QMainWindow):
             # call the classify function with the recent data
             res = classify(recent_data, self.model)
 
-            # if at least 50% of the labels say jumping, then display jumping
+            # if at least 40% of the labels say jumping, then display jumping
             if res["label"].value_counts()[0] > 400:
                 self.label.setText("Jumping")
             else:

@@ -106,6 +106,7 @@ class MainWindow(QMainWindow):
 
         # from main.py
         res = classify(data, self.model)
+        data = data[:len(res)]
 
         # save the output file as CSV into the app_output folder
         new_file_name = input_file_path.replace(".csv", "_output.csv").split("/")[-1]

@@ -25,6 +25,10 @@ class MainWindow(QMainWindow):
 
         self.start = True
 
+        # change depending on screen width
+        font = QFont()
+        font.setPointSize(8)
+
         # set window title
         self.setWindowTitle("Accelerometer Classifier")
 
@@ -34,29 +38,34 @@ class MainWindow(QMainWindow):
         # create label widget for input
         self.input_label = QLabel("Select the input CSV file", self)
         self.input_label.move(10, 10)
+        self.input_label.setFont(font)
         self.input_label.resize(300, 20)
 
         # create text edit widget for displaying the input file path
         self.input_file_edit = QTextEdit("", self)
         self.input_file_edit.move(10, 40)
         self.input_file_edit.resize(300, 20)
+        # self.input_file_edit.setFont(font)
         self.input_file_edit.setReadOnly(True)
 
         # create button widget for selecting the input file
         self.input_file_btn = QPushButton("Select", self)
         self.input_file_btn.move(320, 40)
-        self.input_file_btn.resize(60, 20)
+        self.input_file_btn.resize(80, 40)
+        self.input_file_btn.setFont(font)
         self.input_file_btn.clicked.connect(self.select_input_file)
 
         # create button widget for classifying the data
         self.classify_btn = QPushButton("Classify", self)
         self.classify_btn.move(10, 70)
-        self.classify_btn.resize(60, 20)
+        self.classify_btn.resize(80, 30)
+        self.classify_btn.setFont(font)
         self.classify_btn.clicked.connect(self.classify_data)
 
         # create text edit widget for displaying the output file path
         self.output_file_edit = QTextEdit("", self)
         self.output_file_edit.move(10, 100)
+        self.input_file_btn.setFont(font)
         self.output_file_edit.resize(300, 20)
         self.output_file_edit.setReadOnly(True)
 
@@ -69,19 +78,19 @@ class MainWindow(QMainWindow):
         # create button widget for classifying the data LIVE
         self.classify_live_btn = QPushButton("Classify in real time", self)
         self.classify_live_btn.move(480, 70)
-        self.classify_live_btn.resize(130, 20)
+        self.classify_live_btn.resize(160, 50)
+        self.classify_live_btn.setFont(font)
         self.classify_live_btn.clicked.connect(self.classify_data_live)
 
         # create end experiment btn
         self.end_btn = QPushButton("End Experiment", self)
         self.end_btn.move(480, 125)
-        self.end_btn.resize(125, 20)
+        self.end_btn.resize(160, 50)
+        self.end_btn.setFont(font)
         self.end_btn.clicked.connect(self.end_clicked)
 
         # create label that will update with Jumping or Walking
         self.label = QLabel("Live Experiment Not Started", self)
-        font = QFont()
-        font.setPointSize(16)
         self.label.setFont(font)
         self.label.resize(300, 30)
         self.label.move(480, 20)
@@ -165,7 +174,8 @@ class MainWindow(QMainWindow):
             # read the data from the excel file output from Phyphox
             try:
                 data = pd.read_excel("http://192.168.0.16/export?format=0")
-            except:
+            except Exception as e:
+                print(e)
                 break
 
             # since the xls file will keep getting larger as the expirement continues, only get recent data (last 5000 rows)
